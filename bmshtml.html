@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .alert {
+            color: red;
+            text-align: center;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Banking System</h1>
+        
+        <!-- User Actions -->
+        <div id="user-actions">
+            <button class="button" onclick="showCreateAccountForm()">Create Account</button>
+            <button class="button" onclick="showLoginForm()">Login</button>
+        </div>
+
+        <!-- Account Creation Form -->
+        <div id="create-account-form" style="display:none;">
+            <h2>Create Account</h2>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="create-username" placeholder="Enter Username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="create-password" placeholder="Enter Password">
+            </div>
+            <div class="form-group">
+                <label>Pin</label>
+                <input type="password" id="create-pin" placeholder="Enter 4-digit PIN">
+            </div>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="create-name" placeholder="Enter Full Name">
+            </div>
+            <div class="form-group">
+                <label>Account Type</label>
+                <select id="create-account-type">
+                    <option value="Savings">Savings</option>
+                    <option value="Current">Current</option>
+                </select>
+            </div>
+            <button class="button" onclick="createAccount()">Create Account</button>
+            <div id="create-account-alert" class="alert"></div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form" style="display:none;">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="login-username" placeholder="Enter Username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="Enter Password">
+            </div>
+            <button class="button" onclick="login()">Login</button>
+            <div id="login-alert" class="alert"></div>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="user-dashboard" style="display:none;">
+            <h2>Welcome, <span id="user-name"></span></h2>
+            <button class="button" onclick="checkBalance()">Check Balance</button>
+            <div id="balance-info"></div>
+            <button class="button" onclick="showDepositForm()">Deposit</button>
+            <button class="button" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Deposit Form -->
+        <div id="deposit-form" style="display:none;">
+            <h2>Deposit</h2>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" id="deposit-amount" placeholder="Enter Amount">
+            </div>
+            <button class="button" onclick="deposit()">Deposit</button>
+            <div id="deposit-alert" class="alert"></div>
+        </div>
+    </div>
+
+    <script>
+        let accounts = {};
+        let loggedInUser = null;
+
+        function showCreateAccountForm() {
+            document.getElementById('create-account-form').style.display = 'block';
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('user-dashboard').style.display = 'none';
+        }
+
+        function showLoginForm() {
+            document.getElementById('create-account-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('user-dashboard').style.display = 'none';
+        }
+
+        function createAccount() {
+            const username = document.getElementById('create-username').value;
+            const password = document.getElementById('create-password').value;
+            const pin = document.getElementById('create-pin').value;
+            const name = document.getElementById('create-name').value;
+            const accountType = document.getElementById('create-account-type').value;
+            
+            if (!username || !password || !pin || !name || !accountType) {
+                document.getElementById('create-account-alert').textContent = 'Please fill all fields.';
+                return;
+            }
+
+            const account = {
+                username: username,
+                password: password,
+                pin: pin,
+                name: name,
+                accountType: accountType,
+                balance: 0,
+                transactions: []
+            };
+
+            accounts[username] = account;
+            document.getElementById('create-account-alert').textContent = 'Account created successfully!';
+            document.getElementById('create-account-form').reset();
+        }
+
+        function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            const account = accounts[username];
+            if (account && account.password === password) {
+                loggedInUser = account;
+                document.getElementById('user-name').textContent = account.name;
+                document.getElementById('user-dashboard').style.display = 'block';
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('create-account-form').style.display = 'none';
+            } else {
+                document.getElementById('login-alert').textContent = 'Invalid username or password.';
+            }
+        }
+
+        function logout() {
+            loggedInUser = null;
+            document.getElementById('user-dashboard').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+        }
+
+        function checkBalance() {
+            if (loggedInUser) {
+                document.getElementById('balance-info').textContent = 'Your current balance is: ' + loggedInUser.balance;
+            }
+        }
+
+        function showDepositForm() {
+            document.getElementById('deposit-form').style.display = 'block';
+        }
+
+        function deposit() {
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            if (amount > 0) {
+                loggedInUser.balance += amount;
+                loggedInUser.transactions.push({ type: 'Deposit', amount: amount });
+                document.getElementById('deposit-alert').textContent = 'Deposit successful!';
+                document.getElementById('deposit-form').style.display = 'none';
+            } else {
+                document.getElementById('deposit-alert').textContent = 'Please enter a valid amount.';
+            }
+        }
+    </script>
+</body>
+</html>
